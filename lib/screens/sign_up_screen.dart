@@ -28,6 +28,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
       await _firestore.collection('users').doc(userId).set({
         'email': _emailController.text,
         // Add more fields as needed
+        'name':'',
+        'phone':'',
         'createdAt': Timestamp.now(),
       });
       // Navigate to home screen or show success message
