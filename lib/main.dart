@@ -42,21 +42,34 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: 'Carpool App',
       theme: ThemeData(primarySwatch: Colors.blue),
-      initialRoute: _isLoggedIn ? '/home' : '/', // Decide initial route based on login state
+      initialRoute: _isLoggedIn ? '/' : '/login', // Decide initial route
       routes: {
         '/': (context) => LandingScreen(), // Landing Page (Unauthenticated)
         '/login': (context) => LoginScreen(), // Login Page
         '/signup': (context) => SignUpScreen(), // Sign Up Page
-        '/home': (context) => MainAppScreen(), // Main screen with BottomNavBar
+      },
+      onGenerateRoute: (settings) {
+        // Handle routes dynamically
+        if (settings.name == '/home') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => MainAppScreen(userType: args['userType']),
+          );
+        }
+        return null;
       },
     );
   }
 
   // Handle successful login and navigate to home screen
-  void _handleLoginSuccess() {
+  void _handleLoginSuccess(String userType) {
     setState(() {
       _isLoggedIn = true;
     });
-    Navigator.pushReplacementNamed(context, '/home');
+    Navigator.pushReplacementNamed(
+      context,
+      '/home',
+      arguments: {'userType': userType},
+    );
   }
 }

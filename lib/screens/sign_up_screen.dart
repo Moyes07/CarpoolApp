@@ -11,8 +11,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  String _selectedUserType = "Passenger"; // Default user type
 
   Future<void> _signUp() async {
     try {
@@ -24,14 +25,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
       // Get the user ID
       String userId = userCredential.user!.uid;
 
-      // Store additional user information
-      await _firestore.collection('users').doc(userId).set({
+      // Prepare user data
+      Map<String, dynamic> userData = {
         'email': _emailController.text,
-        // Add more fields as needed
-        'name':'',
-        'phone':'',
+        'name': '',
+        'phone': '',
         'createdAt': Timestamp.now(),
-      });
+        'userType': _selectedUserType,
+      };
+
+      // Store user data in appropriate collection
+      if (_selectedUserType == "Passenger") {
+        await _firestore.collection('users').doc(userId).set(userData);
+      } else if (_selectedUserType == "Driver") {
+        await _firestore.collection('Drivers').doc(userId).set(userData);
+      }
+
       // Navigate to home screen or show success message
       Navigator.pop(context);
     } catch (e) {
@@ -58,6 +67,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
               decoration: InputDecoration(labelText: 'Password'),
               obscureText: true,
             ),
+            DropdownButton<String>(
+              value: _selectedUserType,
+              items: [
+                DropdownMenuItem(
+                  value: "Passenger",
+                  child: Text("Passenger"),
+                ),
+                DropdownMenuItem(
+                  value: "Driver",
+                  child: Text("Driver"),
+                ),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  _selectedUserType = value!;
+                });
+              },
+              hint: Text("Select User Type"),
+            ),
+            SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: _signUp,
               child: Text('Sign Up'),
